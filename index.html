@@ -7,7 +7,8 @@
   <meta name="description" content="Interaktive volldigitalisierte Lerneinheit zu Grimm und Tieck - im Stil eines märchenhaften Quiz-Abenteuers." />
   <style>
     html {
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
+      scroll-padding-top: 18px;
     }
 
     :root {
@@ -64,8 +65,14 @@
       background: var(--card);
       border: 1px solid rgba(255,255,255,.09);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
       border-radius: var(--radius);
+    }
+
+    @supports ((-webkit-backdrop-filter: blur(8px)) or (backdrop-filter: blur(8px))) {
+      .hero, .panel, .ladder, .result-box, .intro-card {
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+      }
     }
 
     .hero {
@@ -75,6 +82,31 @@
       background:
         linear-gradient(135deg, rgba(246, 196, 83, 0.12), rgba(137, 208, 255, 0.08)),
         var(--card);
+    }
+
+    .quick-nav {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .quick-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.09);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .quick-link:hover {
+      background: rgba(255,255,255,.09);
+      border-color: rgba(246, 196, 83, 0.35);
     }
 
     .hero-top {
@@ -275,11 +307,10 @@
       font-weight: 800;
       letter-spacing: 0.02em;
       cursor: pointer;
-      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+      text-decoration: none;
+      transition: background-color .12s ease, border-color .12s ease, box-shadow .12s ease, opacity .12s ease;
     }
 
-    .button:hover { transform: translateY(-1px); }
-    .button:active { transform: translateY(1px); }
     .button.primary {
       background: linear-gradient(135deg, var(--gold), #ffdf87);
       color: #24170a;
@@ -336,7 +367,7 @@
       width: 0%;
       border-radius: 999px;
       background: linear-gradient(90deg, var(--gold), #ffe8a3);
-      transition: width .5s ease;
+      transition: width .2s linear;
     }
 
     .question-title {
@@ -366,15 +397,15 @@
       color: var(--text);
       padding: 16px 18px;
       cursor: pointer;
-      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+      transition: border-color .12s ease, background .12s ease, box-shadow .12s ease;
       font: inherit;
       line-height: 1.45;
     }
 
     .answer:hover {
-      transform: translateY(-1px);
       border-color: rgba(246, 196, 83, 0.52);
       background: rgba(255,255,255,0.07);
+      box-shadow: 0 0 0 1px rgba(246, 196, 83, 0.18);
     }
 
     .answer .label {
@@ -480,7 +511,6 @@
       background: rgba(246, 196, 83, 0.12);
       color: var(--text);
       border-color: rgba(246, 196, 83, 0.32);
-      transform: scale(1.015);
     }
 
     .ladder-item.done {
@@ -556,8 +586,18 @@
       .shell { width: min(100% - 18px, 1180px); padding-top: 18px; }
       .hero, .intro-card, .panel, .ladder, .final-card { padding: 18px; }
       .hero-top { flex-direction: column; }
+      .quick-nav { gap: 8px; }
+      .quick-link { width: 100%; justify-content: center; }
       h1 { max-width: unset; }
       .answer { padding: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
@@ -584,9 +624,14 @@
           <span class="badge">GitHub Pages ready</span>
         </div>
       </div>
+      <nav class="quick-nav" aria-label="Schnellnavigation">
+        <a class="quick-link" href="#ressourcen">Zum Podcast</a>
+        <a class="quick-link" href="#intro">Zur Einführung</a>
+        <a class="quick-link" href="#quizArea">Zum Quizbereich</a>
+      </nav>
     </section>
 
-    <section class="resource-spotlight" aria-label="Prominente Lernressourcen">
+    <section id="ressourcen" class="resource-spotlight" aria-label="Prominente Lernressourcen">
       <article class="resource-card resource-copy">
         <div class="resource-kicker">Neu im Einstieg</div>
         <div>
@@ -609,7 +654,7 @@
           <a class="button secondary" href="assets/textueberschrift-und-link-lerneinheit.docx" target="_blank" rel="noopener noreferrer">
             Begleittext öffnen
           </a>
-          <a class="button secondary" href="#intro">
+          <a class="button secondary" href="#quizArea">
             Zum Quiz springen
           </a>
         </div>
@@ -628,7 +673,7 @@
             Höre die Aufnahme direkt in der Lerneinheit an und wechsle danach ohne Medienbruch ins Quiz.
           </p>
         </div>
-        <audio class="podcast-player" controls preload="metadata">
+        <audio class="podcast-player" controls preload="none">
           <source src="assets/der-gestiefelte-kater-podcast-laura-und-zoe.mp3" type="audio/mpeg" />
           Dein Browser unterstützt das Audio-Element leider nicht.
         </audio>
@@ -657,7 +702,7 @@
       </div>
     </section>
 
-    <div class="grid">
+    <div id="quizArea" class="grid">
       <section id="quizPanel" class="panel" aria-live="polite"></section>
 
       <aside id="ladderPanel" class="ladder" aria-label="Fortschritt">
@@ -850,6 +895,14 @@
     const ladderPanel = document.getElementById('ladderPanel');
     const ladderList = document.getElementById('ladderList');
     const finalScreen = document.getElementById('finalScreen');
+    const quizArea = document.getElementById('quizArea');
+
+    function jumpToElement(element) {
+      if (!element) return;
+      requestAnimationFrame(() => {
+        element.scrollIntoView({ block: 'start', behavior: 'auto' });
+      });
+    }
 
     function ensureAudio() {
       if (!state.audioCtx) {
@@ -996,7 +1049,8 @@
         answers.appendChild(btn);
       });
 
-      quizPanel.querySelector('#nextBtn').addEventListener('click', () => {
+      quizPanel.querySelector('#nextBtn').addEventListener('click', (event) => {
+        event.currentTarget.disabled = true;
         if (state.current < quizData.length - 1) {
           state.current += 1;
           renderLadder();
@@ -1007,7 +1061,7 @@
       });
 
       renderLadder();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      jumpToElement(quizArea);
     }
 
     function checkAnswer(index, btn) {
@@ -1046,11 +1100,10 @@
       state.current = quizData.length;
       renderLadder();
       playWeddingMarch();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      jumpToElement(finalScreen);
     }
 
     function startQuiz() {
-      ensureAudio();
       intro.classList.add('hidden');
       state.current = 0;
       state.answered.clear();
@@ -1058,6 +1111,7 @@
       quizPanel.classList.add('active');
       ladderPanel.classList.add('active');
       renderQuestion();
+      if (state.audioEnabled) requestAnimationFrame(() => ensureAudio());
     }
 
     startBtn.addEventListener('click', startQuiz);
@@ -1069,7 +1123,7 @@
     toggleAudioBtn.addEventListener('click', () => {
       state.audioEnabled = !state.audioEnabled;
       toggleAudioBtn.textContent = state.audioEnabled ? 'Audio ist an' : 'Audio ist aus';
-      if (state.audioEnabled) ensureAudio();
+      if (state.audioEnabled) requestAnimationFrame(() => ensureAudio());
     });
   </script>
 </body>
