@@ -150,6 +150,119 @@
       margin-top: 18px;
     }
 
+    .resource-spotlight {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+      gap: 18px;
+    }
+
+    .resource-card {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, rgba(246, 196, 83, 0.12), rgba(137, 208, 255, 0.1)),
+        rgba(10, 14, 30, 0.88);
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: var(--shadow);
+    }
+
+    .resource-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -50px -60px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255,223,138,.16), transparent 68%);
+      pointer-events: none;
+    }
+
+    .resource-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: var(--gold-2);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+
+    .resource-card h2,
+    .resource-card h3 {
+      margin: 14px 0 10px;
+    }
+
+    .resource-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .resource-copy {
+      display: grid;
+      gap: 16px;
+    }
+
+    .resource-quote {
+      margin: 0;
+      padding: 16px 18px;
+      border-left: 4px solid rgba(246, 196, 83, 0.7);
+      border-radius: 16px;
+      background: rgba(255,255,255,.05);
+      color: #f7f3eb;
+      line-height: 1.75;
+    }
+
+    .resource-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .resource-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .resource-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .podcast-card {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .podcast-player {
+      width: 100%;
+      margin-top: 4px;
+      border-radius: 14px;
+      filter: sepia(.18) saturate(.95) brightness(1.02);
+    }
+
+    .podcast-note {
+      font-size: 0.95rem;
+    }
+
     .button {
       appearance: none;
       border: 0;
@@ -432,6 +545,7 @@
     @media (max-width: 940px) {
       .grid { grid-template-columns: 1fr; }
       .ladder { position: static; order: -1; }
+      .resource-spotlight { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 640px) {
@@ -462,9 +576,60 @@
           <span class="badge">4 Antworten pro Runde</span>
           <span class="badge">Musterlösungen</span>
           <span class="badge">Soundeffekte</span>
+          <span class="badge">Podcast integriert</span>
           <span class="badge">GitHub Pages ready</span>
         </div>
       </div>
+    </section>
+
+    <section class="resource-spotlight" aria-label="Prominente Lernressourcen">
+      <article class="resource-card resource-copy">
+        <div class="resource-kicker">Neu im Einstieg</div>
+        <div>
+          <h2>Starte mit Hörspur und Begleittext</h2>
+          <p>
+            Bevor das Quiz beginnt, kannst du jetzt direkt in den Podcast eintauchen und den begleitenden
+            Einleitungstext öffnen. So wird aus der Lerneinheit ein klarer Dreischritt: hören, einordnen, spielen.
+          </p>
+        </div>
+        <blockquote class="resource-quote">
+          Eine Grossmutter erzählt ihrem Enkelkind die Geschichte des gestiefelten Katers in zwei Versionen.
+          Begib dich mit Doc Croc und Jojo auf eine abenteuerliche Reise zurück in deine Kindheit und erkunde
+          das Märchen der Gebrüder Grimm. Anschliessend bringen euch die beiden KSA-Moderatoren Bartholomeus
+          und Ferdinand Friedenand Tiecks Stück mit Live-Analysen näher.
+        </blockquote>
+        <div class="resource-actions">
+          <a class="button primary" href="assets/der-gestiefelte-kater-podcast-laura-und-zoe.mp3" download>
+            Podcast herunterladen
+          </a>
+          <a class="button secondary" href="assets/textueberschrift-und-link-lerneinheit.docx" target="_blank" rel="noopener noreferrer">
+            Begleittext öffnen
+          </a>
+        </div>
+        <div class="resource-meta" aria-label="Ressourcen-Metadaten">
+          <span class="resource-pill">Podcast von Laura und Zoe</span>
+          <span class="resource-pill">Begleitdokument als DOCX</span>
+          <span class="resource-pill">Ideal vor dem Quiz</span>
+        </div>
+      </article>
+
+      <article class="resource-card podcast-card">
+        <div class="resource-kicker">Podcast direkt abspielen</div>
+        <div>
+          <h3>Der gestiefelte Kater Podcast</h3>
+          <p>
+            Höre die Aufnahme direkt in der Lerneinheit an und wechsle danach ohne Medienbruch ins Quiz.
+          </p>
+        </div>
+        <audio class="podcast-player" controls preload="metadata">
+          <source src="assets/der-gestiefelte-kater-podcast-laura-und-zoe.mp3" type="audio/mpeg" />
+          Dein Browser unterstützt das Audio-Element leider nicht.
+        </audio>
+        <p class="podcast-note">
+          Tipp: Der Begleittext öffnet sich in einem neuen Tab und eignet sich gut als schriftliche Einführung
+          oder zur Projektion im Unterricht.
+        </p>
+      </article>
     </section>
 
     <section id="intro" class="intro-card">
