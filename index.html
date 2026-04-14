@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Der gestiefelte Kater - Interaktive Lerneinheit</title>
+  <meta name="description" content="Interaktive volldigitalisierte Lerneinheit zu Grimm und Tieck - im Stil eines märchenhaften Quiz-Abenteuers." />
+  <style>
+    :root {
+      --bg: #0f1225;
+      --bg2: #1a1f3e;
+      --card: rgba(19, 23, 46, 0.88);
+      --gold: #f6c453;
+      --gold-2: #ffdf8a;
+      --accent: #89d0ff;
+      --danger: #ff7d7d;
+      --ok: #90f1b8;
+      --text: #f7f3eb;
+      --muted: #c9c3b8;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(255, 217, 104, 0.12), transparent 34%),
+        linear-gradient(160deg, #12152a 0%, #171c38 45%, #0b1024 100%);
+      min-height: 100vh;
+    }
+
+    .stars::before,
+    .stars::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.72) 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,255,255,.45) 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(255,215,140,.4) 1px, transparent 1.6px);
+      background-size: 140px 140px, 220px 220px, 300px 300px;
+      background-position: 0 0, 60px 80px, 120px 30px;
+      opacity: .28;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero, .panel, .ladder, .result-box, .intro-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+    }
+
+    .hero {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      background:
+        linear-gradient(135deg, rgba(246, 196, 83, 0.12), rgba(137, 208, 255, 0.08)),
+        var(--card);
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--gold-2);
+      background: rgba(255, 223, 138, 0.12);
+      border: 1px solid rgba(255, 223, 138, 0.2);
+      padding: 8px 12px;
+      border-radius: 999px;
+    }
+
+    h1 {
+      margin: 8px 0 10px;
+      font-size: clamp(2rem, 5vw, 3.45rem);
+      line-height: 1.03;
+      max-width: 14ch;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 76ch;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.6;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(270px, .95fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .intro-card {
+      padding: 24px;
+      margin-top: 22px;
+    }
+
+    .intro-card p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .intro-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 18px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button:active { transform: translateY(1px); }
+    .button.primary {
+      background: linear-gradient(135deg, var(--gold), #ffdf87);
+      color: #24170a;
+      box-shadow: 0 10px 24px rgba(246, 196, 83, 0.26);
+    }
+    .button.secondary {
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .panel {
+      padding: 24px;
+      display: none;
+    }
+
+    .panel.active,
+    .ladder.active,
+    .result-box.active {
+      display: block;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      background: rgba(137, 208, 255, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(137, 208, 255, 0.16);
+    }
+
+    .progress-shell {
+      margin: 12px 0 22px;
+      background: rgba(255,255,255,.07);
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--gold), #ffe8a3);
+      transition: width .5s ease;
+    }
+
+    .question-title {
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
+      margin: 0 0 16px;
+      line-height: 1.35;
+    }
+
+    .question-story {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .answers {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .answer {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+      font: inherit;
+      line-height: 1.45;
+    }
+
+    .answer:hover {
+      transform: translateY(-1px);
+      border-color: rgba(246, 196, 83, 0.52);
+      background: rgba(255,255,255,0.07);
+    }
+
+    .answer .label {
+      display: inline-grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      margin-right: 12px;
+      font-weight: 900;
+      background: rgba(246, 196, 83, 0.12);
+      color: var(--gold-2);
+      flex: 0 0 30px;
+    }
+
+    .answer-inner {
+      display: flex;
+      align-items: start;
+    }
+
+    .answer.correct {
+      border-color: rgba(144, 241, 184, .8);
+      background: rgba(144, 241, 184, .12);
+    }
+
+    .answer.wrong {
+      border-color: rgba(255, 125, 125, .85);
+      background: rgba(255, 125, 125, .12);
+      animation: shake .28s linear 1;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .feedback {
+      margin-top: 18px;
+      min-height: 28px;
+      font-weight: 700;
+    }
+
+    .feedback.ok { color: var(--ok); }
+    .feedback.bad { color: var(--danger); }
+
+    .result-box {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(144,241,184,.12), rgba(255,223,138,.08));
+      border: 1px solid rgba(144,241,184,.25);
+    }
+
+    .result-box h3 {
+      margin: 0 0 10px;
+      font-size: 1.25rem;
+    }
+
+    .result-box p {
+      margin: 0;
+      color: #f6f0e4;
+      line-height: 1.7;
+    }
+
+    .next-wrap {
+      margin-top: 18px;
+      display: flex;
+      justify-content: end;
+    }
+
+    .ladder {
+      display: none;
+      padding: 22px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .ladder h3 {
+      margin: 0 0 14px;
+      font-size: 1.15rem;
+    }
+
+    .ladder-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ladder-item {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+    }
+
+    .ladder-item.active {
+      background: rgba(246, 196, 83, 0.12);
+      color: var(--text);
+      border-color: rgba(246, 196, 83, 0.32);
+      transform: scale(1.015);
+    }
+
+    .ladder-item.done {
+      background: rgba(144,241,184,.1);
+      color: var(--text);
+      border-color: rgba(144,241,184,.2);
+    }
+
+    .ladder-step {
+      font-weight: 900;
+      color: var(--gold-2);
+      text-align: center;
+    }
+
+    .mini-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .final-screen {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .final-screen.active { display: block; }
+
+    .final-card {
+      padding: 26px;
+      background:
+        linear-gradient(135deg, rgba(246, 196, 83, 0.14), rgba(255,255,255,0.04)),
+        var(--card);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .crown {
+      font-size: 3.2rem;
+      margin-bottom: 10px;
+    }
+
+    .final-card h2 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+    }
+
+    .final-card p {
+      margin: 0 auto;
+      max-width: 62ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.93rem;
+      text-align: center;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 940px) {
+      .grid { grid-template-columns: 1fr; }
+      .ladder { position: static; order: -1; }
+    }
+
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 18px, 1180px); padding-top: 18px; }
+      .hero, .intro-card, .panel, .ladder, .final-card { padding: 18px; }
+      .hero-top { flex-direction: column; }
+      h1 { max-width: unset; }
+      .answer { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow">🐾 Volldigitalisierte Lerneinheit</div>
+          <h1>Der gestiefelte Kater<br />als Quiz-Abenteuer</h1>
+          <p class="lead">
+            Erlebe Grimm und Tieck als märchenhafte Challenge im Stil von <em>Wer wird Millionär?</em>.
+            Jede Frage hat vier Antwortmöglichkeiten. Bei einer falschen Antwort lacht der Zauberer,
+            und du musst weiter tüfteln. Bei einer richtigen Antwort miaut der Kater - und die ausführliche Musterlösung erscheint.
+          </p>
+        </div>
+        <div class="hero-badges" aria-label="Merkmale">
+          <span class="badge">10 Fragen</span>
+          <span class="badge">4 Antworten pro Runde</span>
+          <span class="badge">Musterlösungen</span>
+          <span class="badge">Soundeffekte</span>
+          <span class="badge">GitHub Pages ready</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="intro" class="intro-card">
+      <h2>Willkommen im Schloss von Carabas</h2>
+      <p>
+        Diese Lerneinheit basiert auf dem Fragenkatalog sowie auf den Podcast-Transkripten zu
+        <strong>Grimms</strong> und <strong>Tiecks</strong> Version des gestiefelten Katers. Die Antworten wurden so angepasst,
+        dass sie eng am Podcast bleiben: mit Fokus auf List, gesellschaftlichen Aufstieg, Metaebene,
+        Ironie, Schein und Sein sowie den Gegensatz zwischen klassischem Märchen und romantischem Spiel.
+      </p>
+      <p>
+        Ziel: Bringe den Müllerssohn Schritt für Schritt bis zum Happy End. Erst wenn du die richtige Antwort gefunden hast,
+        geht die Geschichte weiter.
+      </p>
+      <div class="intro-actions">
+        <button class="button primary" id="startBtn">Abenteuer starten</button>
+        <button class="button secondary" id="toggleAudioBtn">Audio ist an</button>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section id="quizPanel" class="panel" aria-live="polite"></section>
+
+      <aside id="ladderPanel" class="ladder" aria-label="Fortschritt">
+        <h3>Schlossleiter</h3>
+        <div id="ladderList" class="ladder-list"></div>
+        <p class="mini-note">
+          Falsch geantwortet? Dann hörst du den Zauberer und versuchst es erneut.
+          Richtig geantwortet? Der Kater miaut - und die ausführliche Lösung erscheint sofort.
+        </p>
+      </aside>
+    </div>
+
+    <section id="finalScreen" class="final-screen">
+      <div class="final-card">
+        <div class="crown">👑🐱🎺</div>
+        <h2>Happy End erreicht!</h2>
+        <p>
+          Du hast den Weg durch beide Versionen des Märchens gemeistert: vom scheinbar wertlosen Erbe
+          bis zur Hochzeit am Ende. Jetzt kennst du nicht nur die Handlung, sondern auch die Deutung:
+          Bei Grimm steht die zielgerichtete List im Vordergrund, bei Tieck zusätzlich das Spiel mit Theater,
+          Ironie und der Frage, wie Wirklichkeit überhaupt entsteht.
+        </p>
+        <div class="intro-actions" style="justify-content:center; margin-top: 20px;">
+          <button class="button primary" id="restartBtn">Noch einmal spielen</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Tipp fur GitHub Pages: Lade den kompletten Ordner hoch und setze diese Datei als <code>index.html</code> im Repository-Root.
+    </p>
+  </main>
+
+  <script>
+    const quizData = [
+      {
+        level: 1,
+        phase: "Grimm - Einstieg",
+        title: "Warum wirkt der Kater am Anfang wie das schlechteste Erbe?",
+        story: "Im Grimm-Podcast ist der Mullerssohn zuerst enttauscht: Die Bruder erhalten Muhle und Esel, er selbst nur den Kater. Doc Croc erklart jedoch sofort, dass Marchen oft mit einem unfairen Anfang arbeiten.",
+        options: [
+          "Weil der Kater krank und alt ist und nicht mehr jagen kann.",
+          "Weil ein Tier im Vergleich zu Muhle und Esel zunachst nutzlos wirkt, spater aber durch List zum wertvollsten Erbe wird.",
+          "Weil der Kater dem Mullerssohn sofort das Schloss schenkt.",
+          "Weil der Konig den Kater sofort zu sich an den Hof holt."
+        ],
+        correct: 1,
+        solution: "Zu Beginn scheint der Kater wertlos, weil die anderen Bruder Dinge erhalten, die direkt nutzbar erscheinen: eine Muhle und einen Esel. Im Podcast wird aber betont, dass Marchen genau mit solchen Ungleichheiten arbeiten. Nicht der Anfang entscheidet, sondern das, was daraus gemacht wird. Der Kater kehrt die scheinbare Wertlosigkeit durch Klugheit, Sprache und Strategie vollstandig um. Gerade sein Verstand macht ihn am Ende wertvoller als jeder materielle Besitz."
+      },
+      {
+        level: 2,
+        phase: "Grimm - Symbolik",
+        title: "Wofur stehen die Stiefel des Katers im Podcast besonders?",
+        story: "Als der Kater um Stiefel und Sack bittet, erklart Doc Croc diese Bitte nicht als Luxus, sondern als Symbol. Yoyo erkennt: Das ist kein fauler Stubentiger.",
+        options: [
+          "Fur Eitelkeit und adeligen Schmuck.",
+          "Fur Magie, die nur Tiere besitzen.",
+          "Fur Aktivitat, Bewegung und listiges Handeln.",
+          "Fur die Unterwerfung unter den Konig."
+        ],
+        correct: 2,
+        solution: "Die Stiefel symbolisieren im Grimm-Podcast nicht Reichtum, sondern Handlungsfahigkeit. Doc Croc deutet sie als Zeichen von Aktivitat, Bewegung und List. Der Kater will nicht bequem sein, sondern unterwegs sein, planen, auftreten und handeln. Damit wird schon fruh klar: Sein Erfolg beruht nicht auf Zufall oder roher Kraft, sondern auf strategischem Vorgehen."
+      },
+      {
+        level: 3,
+        phase: "Grimm - Schein und Sein",
+        title: "Was zeigt die Szene mit dem Grafen von Carabas besonders deutlich?",
+        story: "Der Kater bringt dem Konig Geschenke und behauptet hoflich, sie stammten vom Grafen von Carabas. Yoyo merkt sofort: Diesen Grafen gibt es doch gar nicht.",
+        options: [
+          "Dass der Konig Tiere grundsatzlich nicht versteht.",
+          "Dass Sprache und Inszenierung einen gesellschaftlichen Status erschaffen konnen.",
+          "Dass der Kater eigentlich fur den Zauberer arbeitet.",
+          "Dass die Prinzessin den Kater heiraten mochte."
+        ],
+        correct: 1,
+        solution: "Der erfundene Graf von Carabas zeigt, wie stark gesellschaftliche Wirklichkeit von Sprache, Auftreten und Wiederholung abhangt. Im Podcast formuliert Doc Croc das sehr pointiert: Sprache erschafft Wirklichkeit. Der Kater erfindet nicht nur einen Namen, sondern eine soziale Identitat. Der Konig akzeptiert diese Fassade, weil sie gut inszeniert ist. Damit greift das Marchen das Motiv von Schein und Sein auf und kritisiert zugleich, wie leicht Autoritaten sich blenden lassen."
+      },
+      {
+        level: 4,
+        phase: "Grimm - Gesellschaft",
+        title: "Welche Deutung steckt hinter der Fluss-Szene mit den neuen Kleidern?",
+        story: "Der Kater lasst den Mullerssohn baden und ruft dann, der Graf sei beraubt worden. Der Konig lasst sofort kostbare Kleidung bringen, und die Prinzessin betrachtet den jungen Mann plotzlich ganz anders.",
+        options: [
+          "Dass der Mullerssohn erst durch Zauberei sprechen kann.",
+          "Dass in der Gesellschaft oft das Aussehen uber Ansehen und Anerkennung mitentscheidet.",
+          "Dass nur Prinzessinnen neue Kleider tragen durfen.",
+          "Dass Wasser im Marchen immer fur Bestrafung steht."
+        ],
+        correct: 1,
+        solution: "Die Fluss-Szene verdeutlicht das Motiv 'Kleider machen Leute'. Im Podcast wird sie ausdrucklich als wichtiges Marchenmotiv benannt. Sobald der Mullerssohn feine Kleidung tragt, verandert sich seine gesellschaftliche Wirkung. Die Szene zeigt also, dass Anerkennung nicht nur von innerem Wert oder Leistung abhangt, sondern stark vom aussere Eindruck. Damit wird zugleich Kritik an oberflachlichen sozialen Hierarchien sichtbar."
+      },
+      {
+        level: 5,
+        phase: "Grimm - Zauberer",
+        title: "Was lehrt die Begegnung mit dem Zauberer in der Grimm-Version?",
+        story: "Der Kater schmeichelt dem Zauberer, fordert seine Verwandlungskunst heraus und lenkt ihn dann listig in die Maus-Verwandlung. Danach ist der Weg frei.",
+        options: [
+          "Dass der Kater nur mit Gewalt gewinnen kann.",
+          "Dass der Zauberer am Ende aus Mitgefuhl aufgibt.",
+          "Dass Hochmut und Selbstuberschatzung durch Klugheit besiegt werden konnen.",
+          "Dass Magie immer starker ist als Sprache."
+        ],
+        correct: 2,
+        solution: "Der Zauberer ist machtig, scheitert aber an seiner Eitelkeit. Genau darin liegt die Lehre der Szene. Der Kater muss nicht starker sein, sondern nur kluger und psychologisch geschickter. Indem er den Zauberer provoziert und seine Selbstdarstellung ausnutzt, bringt er ihn zu Fall. Das Podcast-Motto dazu lautet sinngemass: Hochmut kommt vor dem Fall. Die Uberwindung des Bosen geschieht also durch List und Intelligenz, nicht durch Kampf."
+      },
+      {
+        level: 6,
+        phase: "Tieck - Prolog",
+        title: "Wodurch unterscheidet sich Tiecks Version schon ganz am Anfang deutlich von Grimm?",
+        story: "Im Tieck-Podcast beginnt die Geschichte nicht einfach mit dem Marchen, sondern im Theater: Zuschauer beschweren sich, reden dazwischen und verstehen das Stuck nicht.",
+        options: [
+          "Tieck lasst den Kater sofort den Zauberer fressen.",
+          "Tieck beginnt mit einer Theater- und Publikumsszene und zeigt damit von Anfang an eine Metaebene.",
+          "Tieck streicht den Konig vollstandig aus der Handlung.",
+          "Tieck macht aus dem Kater einen stummen Diener."
+        ],
+        correct: 1,
+        solution: "Tiecks Fassung setzt mit einem Prolog im Theater ein. Das ist entscheidend, weil damit die Marchenillusion sofort durchbrochen wird. Das Publikum im Stuck spiegelt das echte Publikum und macht deutlich: Hier geht es nicht nur um eine Geschichte, sondern auch um die Kunst des Erzahlens selbst. Im Gegensatz zur schlichten, funktionalen Grimm-Version arbeitet Tieck also von Beginn an mit Ironie, Reflexion und Meta-Theater."
+      },
+      {
+        level: 7,
+        phase: "Tieck - Figurenbild",
+        title: "Wie erscheint der Kater in Tiecks Podcast besonders?",
+        story: "Die Expertinnen betonen, dass Tiecks Kater nicht naiv oder einfach magisch ist. Er wirkt vielmehr bewusst, rational und wie ein Taktiker in einem Kunstspiel.",
+        options: [
+          "Als rein naturliches Haustier ohne Sprache.",
+          "Als traurige Nebenfigur, die kaum eingreift.",
+          "Als rationaler, strategischer und fast moderner Planer.",
+          "Als romantischer Liebhaber der Prinzessin."
+        ],
+        correct: 2,
+        solution: "Im Tieck-Podcast wird der Kater besonders als reflektierte Kunstfigur beschrieben. Er handelt nicht bloss marchenhaft, sondern kalkuliert. Dadurch wirkt er wie ein Schauspieler innerhalb eines literarischen Spiels. Diese Darstellung unterscheidet ihn von Grimm: Dort ist er vor allem der clevere Helfer, bei Tieck wird seine Inszenierungs- und Theaterfunktion viel starker hervorgehoben."
+      },
+      {
+        level: 8,
+        phase: "Tieck - Macht der Sprache",
+        title: "Was bedeutet der Satz des Katers: 'Man erkennt nur das, was man zu sehen glaubt' ?",
+        story: "Im zweiten Tieck-Teil zweifelt der Mullerssohn an seinem Aufstieg. Der Kater antwortet mit diesem Satz, den die Expertinnen als besonders wichtig markieren.",
+        options: [
+          "Dass Wahrheit im Stuck als unveranderlich und objektiv dargestellt wird.",
+          "Dass Wahrnehmung, Auftreten und Deutung mitbestimmen, was als Wirklichkeit gilt.",
+          "Dass Bauern grundsatzlich blind sind.",
+          "Dass nur der Konig die Wahrheit sehen kann."
+        ],
+        correct: 1,
+        solution: "Dieser Satz fasst Tiecks Modernitat zusammen. Im Podcast wird daraus fast eine kleine Erkenntnistheorie gemacht: Wirklichkeit erscheint nicht einfach naturlich gegeben, sondern wird uber Wahrnehmung, Sprache und Inszenierung konstruiert. Wer uberzeugend auftritt, beeinflusst, was andere fur wahr halten. Damit wird der gesellschaftliche Aufstieg des Mullerssohns nicht als echtes Verdienen, sondern als performative Herstellung von Status sichtbar."
+      },
+      {
+        level: 9,
+        phase: "Tieck - Gesellschaftskritik",
+        title: "Welche Kritik steckt in der Bauern- und Konigsszene der Tieck-Version?",
+        story: "Der Kater bedroht Bauern, damit sie vom Grafen sprechen. Der Konig ist beeindruckt, ohne viel zu hinterfragen. So entsteht Schritt fur Schritt eine Scheinwelt.",
+        options: [
+          "Dass Macht und Status oft auf Angst, Wiederholung und Anerkennung beruhen - nicht auf Wahrheit.",
+          "Dass der Konig in Wirklichkeit arm ist.",
+          "Dass Bauern im Stuck alle adlig sind.",
+          "Dass Tieck jede Form von Humor vermeidet."
+        ],
+        correct: 0,
+        solution: "Diese Szenen zeigen Tiecks scharfe Gesellschaftskritik. Der Aufstieg des Mullerssohns basiert nicht auf realem Besitz, sondern auf einer kollektiv mitgetragenen Behauptung. Bauern wiederholen aus Angst die Luge, der Konig ubernimmt sie aus Oberflachlichkeit. Damit macht Tieck deutlich: Macht wirkt oft deswegen stabil, weil Menschen sie sprachlich und sozial bestatigen. Status ist also kein naturlicher Zustand, sondern ein erzeugter Effekt."
+      },
+      {
+        level: 10,
+        phase: "Tieck - Meta-Theater",
+        title: "Warum ist die 'Panne hinter dem Vorhang' fur Tiecks Version so wichtig?",
+        story: "Im dritten Teil streiten Regisseur und Dichter plotzlich uber das Stuck. Alles wirkt, als zerfalle das Theater selbst. Gerade diese Storung wird im Podcast als zentral fur die Matura betont.",
+        options: [
+          "Weil Tieck damit beweist, dass das Stuck unabsichtlich misslungen ist.",
+          "Weil der Zauberer dort heimlich zuruckkehrt.",
+          "Weil die Szene die Illusion bewusst zerstort und zeigt, dass Kunst auch uber sich selbst nachdenken kann.",
+          "Weil damit die Prinzessin zur Hauptfigur wird."
+        ],
+        correct: 2,
+        solution: "Die 'Panne hinter dem Vorhang' macht Tiecks Konzept maximal sichtbar. Das Stuck tut so, als gerate es ausser Kontrolle, und gerade dadurch zeigt es seine eigene Kunstlichkeit. Illusion wird zerstort, die vierte Wand bricht, und das Publikum soll nicht nur mitfuhlen, sondern reflektieren. Deshalb ist die Szene fur die Einordnung in die Fruhromantik so wichtig: Kunst darf irritieren, provozieren und uber sich selbst sprechen."
+      }
+    ];
+
+    const state = {
+      current: -1,
+      audioEnabled: true,
+      answered: new Set(),
+      audioCtx: null
+    };
+
+    const startBtn = document.getElementById('startBtn');
+    const toggleAudioBtn = document.getElementById('toggleAudioBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const intro = document.getElementById('intro');
+    const quizPanel = document.getElementById('quizPanel');
+    const ladderPanel = document.getElementById('ladderPanel');
+    const ladderList = document.getElementById('ladderList');
+    const finalScreen = document.getElementById('finalScreen');
+
+    function ensureAudio() {
+      if (!state.audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) state.audioCtx = new AudioCtx();
+      }
+      if (state.audioCtx && state.audioCtx.state === 'suspended') state.audioCtx.resume();
+      return state.audioCtx;
+    }
+
+    function envGain(ctx, value = 0.14) {
+      const gain = ctx.createGain();
+      gain.gain.value = value;
+      gain.connect(ctx.destination);
+      return gain;
+    }
+
+    function playTone(ctx, type, freq, start, duration, gainNode, endFreq = null) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, start);
+      if (endFreq) osc.frequency.exponentialRampToValueAtTime(Math.max(45, endFreq), start + duration);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.9, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.connect(gain).connect(gainNode);
+      osc.start(start);
+      osc.stop(start + duration + 0.02);
+    }
+
+    function playNoiseBurst(ctx, start, duration, gainNode, bandpass = 900) {
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize / 6));
+      const source = ctx.createBufferSource();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = bandpass;
+      filter.Q.value = 0.8;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.65, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      source.buffer = buffer;
+      source.connect(filter).connect(gain).connect(gainNode);
+      source.start(start);
+      source.stop(start + duration + 0.02);
+    }
+
+    function playMeow() {
+      if (!state.audioEnabled) return;
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const master = envGain(ctx, 0.18);
+      const now = ctx.currentTime + 0.02;
+      playTone(ctx, 'sawtooth', 660, now, 0.18, master, 340);
+      playTone(ctx, 'triangle', 520, now + 0.06, 0.26, master, 220);
+      playNoiseBurst(ctx, now + 0.02, 0.12, master, 1200);
+    }
+
+    function playEvilLaugh() {
+      if (!state.audioEnabled) return;
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const master = envGain(ctx, 0.15);
+      const now = ctx.currentTime + 0.02;
+      const notes = [420, 500, 390, 470];
+      notes.forEach((freq, i) => {
+        const start = now + i * 0.16;
+        playTone(ctx, 'square', freq, start, 0.13, master, freq * 0.88);
+        playNoiseBurst(ctx, start + 0.02, 0.08, master, 700);
+      });
+    }
+
+    function playWeddingMarch() {
+      if (!state.audioEnabled) return;
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const master = envGain(ctx, 0.14);
+      const now = ctx.currentTime + 0.03;
+      const melody = [392, 392, 392, 523.25, 440, 392, 523.25, 440, 392, 587.33, 587.33, 587.33, 659.25, 523.25, 440, 392];
+      melody.forEach((freq, i) => {
+        const start = now + i * 0.22;
+        playTone(ctx, 'triangle', freq, start, 0.19, master, freq);
+      });
+    }
+
+    function renderLadder() {
+      ladderList.innerHTML = '';
+      quizData.slice().reverse().forEach((item, indexFromTop) => {
+        const absoluteIndex = quizData.length - 1 - indexFromTop;
+        const div = document.createElement('div');
+        div.className = 'ladder-item';
+        if (absoluteIndex === state.current) div.classList.add('active');
+        if (state.answered.has(absoluteIndex)) div.classList.add('done');
+        div.innerHTML = `
+          <div class="ladder-step">${item.level}</div>
+          <div>
+            <strong>${item.phase}</strong><br />
+            <span>${item.title}</span>
+          </div>
+        `;
+        ladderList.appendChild(div);
+      });
+    }
+
+    function renderQuestion() {
+      const q = quizData[state.current];
+      const progress = ((state.current) / quizData.length) * 100;
+      quizPanel.classList.add('active');
+      ladderPanel.classList.add('active');
+      finalScreen.classList.remove('active');
+      quizPanel.innerHTML = `
+        <div class="meta-row">
+          <span class="pill">Runde ${q.level} von ${quizData.length}</span>
+          <span class="pill">${q.phase}</span>
+        </div>
+        <div class="progress-shell"><div class="progress-bar" style="width:${progress}%"></div></div>
+        <p class="question-story">${q.story}</p>
+        <h2 class="question-title">${q.title}</h2>
+        <div class="answers" id="answers"></div>
+        <div id="feedback" class="feedback"></div>
+        <div id="resultBox" class="result-box" aria-live="polite"></div>
+        <div class="next-wrap hidden" id="nextWrap">
+          <button class="button primary" id="nextBtn">Zur nachsten Runde</button>
+        </div>
+      `;
+
+      const answers = quizPanel.querySelector('#answers');
+      const letters = ['A', 'B', 'C', 'D'];
+
+      q.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer';
+        btn.innerHTML = `
+          <span class="answer-inner">
+            <span class="label">${letters[index]}</span>
+            <span>${option}</span>
+          </span>
+        `;
+        btn.addEventListener('click', () => checkAnswer(index, btn));
+        answers.appendChild(btn);
+      });
+
+      quizPanel.querySelector('#nextBtn').addEventListener('click', () => {
+        if (state.current < quizData.length - 1) {
+          state.current += 1;
+          renderLadder();
+          renderQuestion();
+        } else {
+          showFinal();
+        }
+      });
+
+      renderLadder();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function checkAnswer(index, btn) {
+      const q = quizData[state.current];
+      const feedback = quizPanel.querySelector('#feedback');
+      const resultBox = quizPanel.querySelector('#resultBox');
+      const nextWrap = quizPanel.querySelector('#nextWrap');
+      const allButtons = [...quizPanel.querySelectorAll('.answer')];
+
+      if (index === q.correct) {
+        allButtons.forEach((button, i) => {
+          button.disabled = true;
+          if (i === q.correct) button.classList.add('correct');
+        });
+        feedback.textContent = 'Richtig! Der Kater miaut zufrieden - und die Musterlosung wird eingeblendet.';
+        feedback.className = 'feedback ok';
+        resultBox.classList.add('active');
+        resultBox.innerHTML = `<h3>Ausfuhrliche Musterlosung</h3><p>${q.solution}</p>`;
+        nextWrap.classList.remove('hidden');
+        state.answered.add(state.current);
+        renderLadder();
+        playMeow();
+      } else {
+        btn.classList.add('wrong');
+        btn.disabled = true;
+        feedback.textContent = 'Noch nicht! Der Zauberer lacht boshaft. Versuch es erneut, bis die richtige Losung gefunden ist.';
+        feedback.className = 'feedback bad';
+        playEvilLaugh();
+        setTimeout(() => btn.classList.remove('wrong'), 400);
+      }
+    }
+
+    function showFinal() {
+      quizPanel.classList.remove('active');
+      finalScreen.classList.add('active');
+      state.current = quizData.length;
+      renderLadder();
+      playWeddingMarch();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startQuiz() {
+      ensureAudio();
+      intro.classList.add('hidden');
+      state.current = 0;
+      state.answered.clear();
+      finalScreen.classList.remove('active');
+      quizPanel.classList.add('active');
+      ladderPanel.classList.add('active');
+      renderQuestion();
+    }
+
+    startBtn.addEventListener('click', startQuiz);
+    restartBtn.addEventListener('click', () => {
+      intro.classList.add('hidden');
+      startQuiz();
+    });
+
+    toggleAudioBtn.addEventListener('click', () => {
+      state.audioEnabled = !state.audioEnabled;
+      toggleAudioBtn.textContent = state.audioEnabled ? 'Audio ist an' : 'Audio ist aus';
+      if (state.audioEnabled) ensureAudio();
+    });
+  </script>
+</body>
+</html>
